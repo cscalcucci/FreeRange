@@ -14,6 +14,7 @@
 		836C13A11CCD82C40011102D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 836C139F1CCD82C40011102D /* LaunchScreen.storyboard */; };
 		836C13AC1CCD82C40011102D /* FreeRangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836C13AB1CCD82C40011102D /* FreeRangeTests.swift */; };
 		836C13B71CCD82C40011102D /* FreeRangeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836C13B61CCD82C40011102D /* FreeRangeUITests.swift */; };
+		836C13C51CCD84FE0011102D /* FreeRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836C13C41CCD84FE0011102D /* FreeRange.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		836C13B21CCD82C40011102D /* FreeRangeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FreeRangeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		836C13B61CCD82C40011102D /* FreeRangeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeRangeUITests.swift; sourceTree = "<group>"; };
 		836C13B81CCD82C40011102D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		836C13C41CCD84FE0011102D /* FreeRange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreeRange.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +101,7 @@
 			children = (
 				836C13961CCD82C40011102D /* AppDelegate.swift */,
 				836C13981CCD82C40011102D /* ViewController.swift */,
+				836C13C41CCD84FE0011102D /* FreeRange.swift */,
 				836C139A1CCD82C40011102D /* Main.storyboard */,
 				836C139D1CCD82C40011102D /* Assets.xcassets */,
 				836C139F1CCD82C40011102D /* LaunchScreen.storyboard */,
@@ -256,6 +259,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				836C13C51CCD84FE0011102D /* FreeRange.swift in Sources */,
 				836C13991CCD82C40011102D /* ViewController.swift in Sources */,
 				836C13971CCD82C40011102D /* AppDelegate.swift in Sources */,
 			);
@@ -402,6 +406,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = FreeRange/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = AphelionLLC.FreeRange;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -413,6 +418,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = FreeRange/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = AphelionLLC.FreeRange;
 				PRODUCT_NAME = "$(TARGET_NAME)";
