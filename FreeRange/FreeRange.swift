@@ -18,11 +18,11 @@ extension UIImage: MediaType {}
 extension UIColor: MediaType {}
 typealias RangeMedia = MediaType
 
-enum ThumbType {
+internal enum ThumbType {
     case Left, Right, Both
 }
 
-enum ThumbStyle : RangeMedia {
+internal enum ThumbStyle : RangeMedia {
     case Contained(RangeMedia)
     case Balanced(RangeMedia)
     case Freestyle(RangeMedia)
@@ -40,7 +40,7 @@ enum ThumbStyle : RangeMedia {
     }
 }
 
-enum TrackStyle {
+internal enum TrackStyle {
     case Transformed(inner: RangeMedia, outer: RangeMedia)
     case Revealed(media: RangeMedia, outerAlpha: CGFloat )
     
@@ -62,6 +62,39 @@ class FreeRange: UIControl {
     internal let leftThumbLayer = FreeRangeThumbLayer(.Left)
     internal let rightThumbLayer = FreeRangeThumbLayer(.Right)
     internal var previousLocation = CGPoint()
+    
+    var increment : Double = 1.0 {
+        didSet {
+            updateLayerFrames()
+        }
+    }
+    
+    var trackRange : (min: Double, max: Double) = (0.0, 1.0) {
+        didSet {
+            updateLayerFrames()
+        }
+    }
+    
+    var thumbPosition : (left: Double, right: Double) = (0.5, 0.8) {
+        didSet {
+            updateLayerFrames()
+        }
+    }
+    
+    var curvaceousness: CGFloat = 1.0 {
+        didSet {
+            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(NSEC_PER_SEC))
+            dispatch_after(time, dispatch_get_main_queue()) {
+                self.trackLayer.setNeedsDisplay()
+                self.leftThumbLayer.setNeedsDisplay()
+                self.rightThumbLayer.setNeedsDisplay()
+            }
+        }
+    }
+    
+    var thumbWidth: CGFloat {
+        return CGFloat(bounds.height)
+    }
     
     private var leftThumb: ThumbStyle = .Balanced(UIColor.whiteColor()) {
         didSet {
@@ -134,55 +167,15 @@ class FreeRange: UIControl {
         get {
             var fillColor = UIColor.redColor().CGColor
             switch self.trackStyle {
-            case let .Transformed(_, outer):
-                if let media = outer as? UIImage { fillColor = UIColor(patternImage: media).CGColor }
-                if let media = outer as? UIColor { fillColor = media.CGColor }
-            case let .Revealed(image, _):
-                if let media = image as? UIImage { fillColor = UIColor(patternImage: media).CGColor }
-                if let media = image as? UIColor { fillColor = media.CGColor }
+                case let .Transformed(_, outer):
+                    if let media = outer as? UIImage { fillColor = UIColor(patternImage: media).CGColor }
+                    if let media = outer as? UIColor { fillColor = media.CGColor }
+                case let .Revealed(image, _):
+                    if let media = image as? UIImage { fillColor = UIColor(patternImage: media).CGColor }
+                    if let media = image as? UIColor { fillColor = media.CGColor }
             }
             return fillColor
         }
-    }
-    
-    var minimumValue: Double = 0.0 {
-        didSet {
-            updateLayerFrames()
-        }
-    }
-    
-    var maximumValue: Double = 1.0 {
-        didSet {
-            updateLayerFrames()
-        }
-    }
-    
-    var lowerValue: Double = 0.2 {
-        didSet {
-            updateLayerFrames()
-        }
-    }
-    
-    var upperValue: Double = 0.8 {
-        didSet {
-            updateLayerFrames()
-        }
-    }
-
-    
-    var curvaceousness: CGFloat = 1.0 {
-        didSet {
-            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(NSEC_PER_SEC))
-            dispatch_after(time, dispatch_get_main_queue()) {
-                self.trackLayer.setNeedsDisplay()
-                self.leftThumbLayer.setNeedsDisplay()
-                self.rightThumbLayer.setNeedsDisplay()
-            }
-        }
-    }
-    
-    var thumbWidth: CGFloat {
-        return CGFloat(bounds.height)
     }
     
     override var frame: CGRect {
@@ -242,12 +235,12 @@ class FreeRange: UIControl {
         trackLayer.frame = bounds.insetBy(dx: 0.0, dy: bounds.height / 3)
         trackLayer.setNeedsDisplay()
         
-        let lowerThumbCenter = CGFloat(positionForValue(lowerValue))
+        let lowerThumbCenter = CGFloat(positionForValue(thumbPosition.left))
         
         leftThumbLayer.frame = CGRect(x: lowerThumbCenter - thumbWidth / 2.0, y: 0.0, width: thumbWidth, height: thumbWidth)
         leftThumbLayer.setNeedsDisplay()
         
-        let upperThumbCenter = CGFloat(positionForValue(upperValue))
+        let upperThumbCenter = CGFloat(positionForValue(thumbPosition.right))
         rightThumbLayer.frame = CGRect(x: upperThumbCenter - thumbWidth / 2.0, y: 0.0,
                                        width: thumbWidth, height: thumbWidth)
         rightThumbLayer.setNeedsDisplay()
@@ -256,8 +249,8 @@ class FreeRange: UIControl {
     }
     
     func positionForValue(value: Double) -> Double {
-        return Double(bounds.width - thumbWidth) * (value - minimumValue) /
-            (maximumValue - minimumValue) + Double(thumbWidth / 2.0)
+        return Double(bounds.width - thumbWidth) * (value - trackRange.min) /
+            (trackRange.max - trackRange.min) + Double(thumbWidth / 2.0)
     }
     
     // Touch handlers
@@ -283,22 +276,32 @@ class FreeRange: UIControl {
         
         // 1. Determine by how much the user has dragged
         let deltaLocation = Double(location.x - previousLocation.x)
-        let deltaValue = (maximumValue - minimumValue) * deltaLocation / Double(bounds.width - bounds.height)
+        let deltaValue = (trackRange.max - trackRange.min) * deltaLocation / Double(bounds.width - bounds.height)
         
         previousLocation = location
         
         // 2. Update the values
         if leftThumbLayer.highlighted {
-            lowerValue += deltaValue
-            lowerValue = boundValue(lowerValue, toLowerValue: minimumValue, upperValue: upperValue)
+            thumbPosition.left += deltaValue
+            thumbPosition.left = boundValue(thumbPosition.left, toLowerValue: trackRange.min, upperValue: thumbPosition.right)
+            thumbPosition.left = roundTo(thumbPosition.left, places: 100.0)
         } else if rightThumbLayer.highlighted {
-            upperValue += deltaValue
-            upperValue = boundValue(upperValue, toLowerValue: lowerValue, upperValue: maximumValue)
+            thumbPosition.right += deltaValue
+            thumbPosition.right = boundValue(thumbPosition.right, toLowerValue: thumbPosition.left, upperValue: trackRange.max)
         }
         
         sendActionsForControlEvents(.ValueChanged)
         return true
         
+    }
+    
+    func roundTo(value: Double, places: Double) -> Double {
+        return round(places * value) / places
+    }
+    
+    func roundUp(value: Double, divisor: Double) -> Double {
+        let rem = value % divisor
+        return rem == 0 ? value : value + divisor - rem
     }
     
     override func endTrackingWithTouch(touch: UITouch?, withEvent event: UIEvent?) {
@@ -307,7 +310,7 @@ class FreeRange: UIControl {
     }
 }
 
-class FreeRangeThumbLayer: CALayer {
+internal class FreeRangeThumbLayer: CALayer {
     
     var highlighted: Bool = false {
         didSet {
@@ -365,7 +368,7 @@ class FreeRangeThumbLayer: CALayer {
     }
 }
 
-class FreeRangeTrackLayer: CALayer {
+internal class FreeRangeTrackLayer: CALayer {
     weak var rangeSlider: FreeRange?
     
     override func drawInContext(ctx: CGContext) {
@@ -382,8 +385,8 @@ class FreeRangeTrackLayer: CALayer {
             
             // Fill the highlighted range
             CGContextSetFillColorWithColor(ctx, slider.trackOuterFill)
-            let lowerValuePosition = CGFloat(slider.positionForValue(slider.lowerValue))
-            let upperValuePosition = CGFloat(slider.positionForValue(slider.upperValue))
+            let lowerValuePosition = CGFloat(slider.positionForValue(slider.thumbPosition.left))
+            let upperValuePosition = CGFloat(slider.positionForValue(slider.thumbPosition.right))
             let rect = CGRect(x: lowerValuePosition, y: 0.0, width: upperValuePosition - lowerValuePosition, height: bounds.height)
             CGContextFillRect(ctx, rect)
         }

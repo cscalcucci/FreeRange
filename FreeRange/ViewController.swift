@@ -31,11 +31,10 @@ class ViewController: UIViewController, FreeRangeDelegate {
         let width = view.bounds.width - 2.0 * margin
         rangeSlider.frame = CGRect(x: margin, y: margin + topLayoutGuide.length + (view.frame.width / 4), width: width, height: 31.0)
         rangeSliderTwo.frame = CGRect(x: margin, y: margin + topLayoutGuide.length + (view.frame.width / 2), width: width, height: 31.0)
-
     }
     
     func rangeSliderValueChanged(slider: FreeRange) {
-        print("Range slider value changed (Upper: \(slider.lowerValue) Lower: \(slider.upperValue))")
+        print("Range slider value changed (Lower: \(slider.thumbPosition.left) Upper: \(slider.thumbPosition.right))")
     }
     
     func setSliderOne() {
@@ -51,7 +50,7 @@ class ViewController: UIViewController, FreeRangeDelegate {
         rangeSliderTwo.setTrackStyle(TrackStyle.Revealed(media: UIImage(named: "Inner")!, outerAlpha: 0.5))
         rangeSliderTwo.setThumbStyle(ThumbStyle.Balanced(UIImage(named: "Inner")!), forThumb: .Right)
         rangeSliderTwo.setThumbStyle(ThumbStyle.Balanced(UIImage(named: "Outer")!), forThumb: .Left)
-        rangeSliderTwo.curvaceousness = 0.0
+        rangeSliderTwo.curvaceousness = 5.0
     }
 }
 
